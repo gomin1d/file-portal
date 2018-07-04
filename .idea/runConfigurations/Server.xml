@@ -1,0 +1,12 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Server" type="JarApplication" factoryName="JAR Application" singleton="true">
+    <option name="JAR_PATH" value="$PROJECT_DIR$/TestServer/file-portal.jar" />
+    <option name="VM_PARAMETERS" value="-Dfile.encoding=UTF-8 -Xmx1G" />
+    <option name="PROGRAM_PARAMETERS" value="server 25565 ./testfolder" />
+    <option name="WORKING_DIRECTORY" value="D:\IdeaProjects\file-portal\TestServer\" />
+    <option name="ALTERNATIVE_JRE_PATH" />
+    <method>
+      <option name="Maven.BeforeRunTask" enabled="true" file="D:\IdeaProjects\file-portal/pom.xml" goal="package -P server" />
+    </method>
+  </configuration>
+</component>
