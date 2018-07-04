@@ -78,6 +78,7 @@ public class Main {
 
                     int send = 0;
                     int lastLog = 0;
+                    long lastLogTime = System.currentTimeMillis();
 
                     int read;
                     while ((read = inFile.read(bytes, 0, Math.min(packetLen, inFile.available()))) > 0) {
@@ -85,25 +86,17 @@ public class Main {
 
                         send += read;
                         if (total > 1_000_000 && (send - lastLog > total / 10)) {
+                            long current = System.currentTimeMillis();
+                            System.out.println("Передача файла " + toLog(send) + "/" + toLog(total) + " средняя скорость " +
+                                    toLog((send - lastLog) / ((current - lastLogTime) / 1000)) + "/sec");
                             lastLog = send;
-                            System.out.println("Передача файла " + toLog(send) + "/" + toLog(total));
+                            lastLogTime = current;
                         }
                     }
                 }
             }
 
             out.flush();
-        }
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    private static void findFiles(File base, List<File> out) {
-        for (File file : base.listFiles()) {
-            if (file.isDirectory()) {
-                findFiles(file, out);
-            } else {
-                out.add(file);
-            }
         }
     }
 
@@ -147,6 +140,7 @@ public class Main {
                     int total = count;
                     int load = 0;
                     int lastLog = 0;
+                    long lastLogTime = System.currentTimeMillis();
 
                     int read;
                     while ((read = in.read(bytes, 0, Math.min(packetLen, count))) > 0) {
@@ -155,11 +149,25 @@ public class Main {
 
                         load += read;
                         if (total > 1_000_000 && (load - lastLog > total / 10)) {
+                            long current = System.currentTimeMillis();
+                            System.out.println("Скачка файла " + toLog(load) + "/" + toLog(total) + " средняя скорость " +
+                                    toLog((load - lastLog) / ((current - lastLogTime) / 1000)) + "/sec");
                             lastLog = load;
-                            System.out.println("Скачка файла " + toLog(load) + "/" + toLog(total));
+                            lastLogTime = current;
                         }
                     }
                 }
+            }
+        }
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    private static void findFiles(File base, List<File> out) {
+        for (File file : base.listFiles()) {
+            if (file.isDirectory()) {
+                findFiles(file, out);
+            } else {
+                out.add(file);
             }
         }
     }
