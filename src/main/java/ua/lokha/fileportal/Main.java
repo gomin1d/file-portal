@@ -87,8 +87,15 @@ public class Main {
                         send += read;
                         if (total > 1_000_000 && (send - lastLog > total / 10)) {
                             long current = System.currentTimeMillis();
-                            System.out.println("Передача файла " + toLog(send) + "/" + toLog(total) + " средняя скорость " +
-                                    toLog((send - lastLog) / ((current - lastLogTime) / 1000)) + "/sec");
+                            long timePassed = current - lastLogTime;
+                            if (timePassed > 0) {
+                                try {
+                                    System.out.println("Передача файла " + toLog(send) + "/" + toLog(total) + " средняя скорость " +
+                                            toLog((send - lastLog) / (timePassed / 1000)) + "/sec");
+                                } catch (Throwable e) {
+                                    System.out.println("BUG: " + e);
+                                }
+                            }
                             lastLog = send;
                             lastLogTime = current;
                         }
@@ -150,8 +157,15 @@ public class Main {
                         load += read;
                         if (total > 1_000_000 && (load - lastLog > total / 10)) {
                             long current = System.currentTimeMillis();
-                            System.out.println("Скачка файла " + toLog(load) + "/" + toLog(total) + " средняя скорость " +
-                                    toLog((load - lastLog) / ((current - lastLogTime) / 1000)) + "/sec");
+                            long timePassed = current - lastLogTime;
+                            if (timePassed > 0) {
+                                try {
+                                    System.out.println("Скачка файла " + toLog(load) + "/" + toLog(total) + " средняя скорость " +
+                                            toLog((load - lastLog) / (timePassed / 1000)) + "/sec");
+                                } catch (Throwable e) {
+                                    System.out.println("BUG: " + e);
+                                }
+                            }
                             lastLog = load;
                             lastLogTime = current;
                         }
