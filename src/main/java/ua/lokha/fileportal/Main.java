@@ -16,12 +16,31 @@ public class Main {
             return;
         }
 
+        boolean retry = true;
         switch (args[0]) {
             case "server":
-                mainServer(args);
+                while (retry) {
+                    try {
+                        mainServer(args);
+                        retry = false;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("Пробуем снова через 3 сек...");
+                        Thread.sleep(3000);
+                    }
+                }
                 break;
             case "client":
-                mainClient(args);
+                while (retry) {
+                    try {
+                        mainClient(args);
+                        retry = false;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        System.out.println("Пробуем снова через 3 сек...");
+                        Thread.sleep(3000);
+                    }
+                }
                 break;
             default:
                 System.out.println("Неизвестное значение '" + args[0] + "' укажите что-то одно из: server, client");
