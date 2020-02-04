@@ -5,7 +5,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class Main {
     private static final int packetLen = 1024 * 1024;
@@ -95,8 +94,8 @@ public class Main {
                     int total = inFile.available();
                     out.writeInt(total);
 
-                    int send = 0;
-                    int lastLog = 0;
+                    long send = 0;
+                    long lastLog = 0;
                     long lastLogTime = System.currentTimeMillis();
 
                     int read;
@@ -104,19 +103,21 @@ public class Main {
                         out.write(bytes, 0, read);
 
                         send += read;
-                        if (total > 1_000_000 && (send - lastLog > total / 10)) {
+                        if (total > 1_000_000) {
                             long current = System.currentTimeMillis();
                             long timePassed = current - lastLogTime;
-                            if (timePassed > 0) {
+                            if (timePassed > 10_000) {
                                 try {
-                                    System.out.println("Передача файла " + toLog(send) + "/" + toLog(total) + " средняя скорость " +
+                                    System.out.println("Передача файла " + toLog(send) + "/" + toLog(total) +
+                                            " " + (int)(((double)send / total) * 100) + "%" +
+                                            " средняя скорость " +
                                             toLog((send - lastLog) / (timePassed / 1000)) + "/sec");
                                 } catch (Throwable e) {
                                     System.out.println("BUG: " + e);
                                 }
+                                lastLog = send;
+                                lastLogTime = current;
                             }
-                            lastLog = send;
-                            lastLogTime = current;
                         }
                     }
                 }
@@ -163,9 +164,9 @@ public class Main {
                 try (OutputStream outFile = new FileOutputStream(file, true)) {
                     int count = in.readInt();
 
-                    int total = count;
-                    int load = 0;
-                    int lastLog = 0;
+                    long total = count;
+                    long load = 0;
+                    long lastLog = 0;
                     long lastLogTime = System.currentTimeMillis();
 
                     int read;
@@ -174,19 +175,21 @@ public class Main {
                         outFile.write(bytes, 0, read);
 
                         load += read;
-                        if (total > 1_000_000 && (load - lastLog > total / 10)) {
+                        if (total > 1_000_000) {
                             long current = System.currentTimeMillis();
                             long timePassed = current - lastLogTime;
-                            if (timePassed > 0) {
+                            if (timePassed > 10_000) {
                                 try {
-                                    System.out.println("Скачка файла " + toLog(load) + "/" + toLog(total) + " средняя скорость " +
+                                    System.out.println("Скачка файла " + toLog(load) + "/" + toLog(total) +
+                                            " " + (int)(((double)load / total) * 100) + "%" +
+                                            " средняя скорость " +
                                             toLog((load - lastLog) / (timePassed / 1000)) + "/sec");
                                 } catch (Throwable e) {
                                     System.out.println("BUG: " + e);
                                 }
+                                lastLog = load;
+                                lastLogTime = current;
                             }
-                            lastLog = load;
-                            lastLogTime = current;
                         }
                     }
                 }
@@ -207,7 +210,8 @@ public class Main {
 
     private static String toLog(long bytes) {
         if (bytes >= 1_000_000) {
-            return (bytes / 1_000_000) + "MB";
+            long mb = bytes / 1_000_000;
+            return mb + "." + ((bytes - (mb * 1_000_000)) / 1_000) + "MB";
         }
         if (bytes >= 1_000) {
             return (bytes / 1_000) + "KB";
