@@ -91,15 +91,24 @@ public class Main {
                         inFile.skip(start);
                     }
 
-                    int total = inFile.available();
-                    out.writeInt(total);
+                    long total = file.length() - start;
+                    out.writeLong(total);
 
                     long send = 0;
                     long lastLog = 0;
                     long lastLogTime = System.currentTimeMillis();
 
+                    long lastRead = System.currentTimeMillis();
                     int read;
-                    while ((read = inFile.read(bytes, 0, Math.min(packetLen, inFile.available()))) > 0) {
+                    while ((read = inFile.read(bytes, 0, Math.min(packetLen, inFile.available()))) != -1) {
+                        if (read == 0) {
+                            if (System.currentTimeMillis() - lastRead > 10_000) {
+                                throw new Exception("Уже 10 сек не идут данные");
+                            }
+                            continue;
+                        }
+                        lastRead = System.currentTimeMillis();
+
                         out.write(bytes, 0, read);
 
                         send += read;
@@ -162,15 +171,24 @@ public class Main {
                 }
 
                 try (OutputStream outFile = new FileOutputStream(file, true)) {
-                    int count = in.readInt();
+                    long count = in.readLong();
 
                     long total = count;
                     long load = 0;
                     long lastLog = 0;
                     long lastLogTime = System.currentTimeMillis();
 
+                    long lastRead = System.currentTimeMillis();
                     int read;
-                    while ((read = in.read(bytes, 0, Math.min(packetLen, count))) > 0) {
+                    while ((read = in.read(bytes, 0, Math.min(packetLen, in.available()))) != -1) {
+                        if (read == 0) {
+                            if (System.currentTimeMillis() - lastRead > 10_000) {
+                                throw new Exception("Уже 10 сек не идут данные");
+                            }
+                            continue;
+                        }
+                        lastRead = System.currentTimeMillis();
+
                         count -= read;
                         outFile.write(bytes, 0, read);
 
