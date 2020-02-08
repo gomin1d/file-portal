@@ -75,6 +75,7 @@ public class Main {
             findFiles(base, files);
 
             out.writeInt(files.size());
+            out.flush();
 
             byte[] bytes = new byte[packetLen];
 
@@ -82,7 +83,6 @@ public class Main {
                 System.out.println("Передаем файл " + file);
                 try (InputStream inFile = new FileInputStream(file)) {
                     out.writeUTF(base.getParentFile().toURI().relativize(file.toURI()).getPath()); // relative
-
                     out.flush();
 
                     long start = in.readLong();
@@ -93,6 +93,7 @@ public class Main {
 
                     long total = file.length() - start;
                     out.writeLong(total);
+                    out.flush();
 
                     long send = 0;
                     long lastLog = 0;
@@ -100,7 +101,7 @@ public class Main {
 
                     long lastRead = System.currentTimeMillis();
                     int read;
-                    while ((read = inFile.read(bytes, 0, Math.min(packetLen, inFile.available()))) != -1) {
+                    while ((read = inFile.read(bytes, 0, Math.min(packetLen, (int)(total - send)))) != -1 && send < total) {
                         if (read == 0) {
                             if (System.currentTimeMillis() - lastRead > 10_000) {
                                 throw new Exception("Уже 10 сек не идут данные");
@@ -180,7 +181,7 @@ public class Main {
 
                     long lastRead = System.currentTimeMillis();
                     int read;
-                    while ((read = in.read(bytes, 0, Math.min(packetLen, in.available()))) != -1) {
+                    while ((read = in.read(bytes, 0, Math.min(packetLen, (int)count))) != -1 && count > 0) {
                         if (read == 0) {
                             if (System.currentTimeMillis() - lastRead > 10_000) {
                                 throw new Exception("Уже 10 сек не идут данные");
