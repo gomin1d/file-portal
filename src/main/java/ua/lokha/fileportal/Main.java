@@ -101,7 +101,7 @@ public class Main {
 
                     long lastRead = System.currentTimeMillis();
                     int read;
-                    while ((read = inFile.read(bytes, 0, Math.min(packetLen, (int)(total - send)))) != -1 && send < total) {
+                    while ((read = inFile.read(bytes, 0, Math.min(packetLen, floorLongToInt(total - send)))) != -1 && send < total) {
                         if (read == 0) {
                             if (System.currentTimeMillis() - lastRead > 10_000) {
                                 throw new Exception("Уже 10 сек не идут данные");
@@ -181,7 +181,7 @@ public class Main {
 
                     long lastRead = System.currentTimeMillis();
                     int read;
-                    while ((read = in.read(bytes, 0, Math.min(packetLen, (int)count))) != -1 && count > 0) {
+                    while ((read = in.read(bytes, 0, Math.min(packetLen, floorLongToInt(count)))) != -1 && count > 0) {
                         if (read == 0) {
                             if (System.currentTimeMillis() - lastRead > 10_000) {
                                 throw new Exception("Уже 10 сек не идут данные");
@@ -225,6 +225,18 @@ public class Main {
                 out.add(file);
             }
         }
+    }
+
+    public static int floorLongToInt(long value) {
+        if (value >= Integer.MAX_VALUE) {
+            return Integer.MAX_VALUE;
+        }
+
+        if (value <= Integer.MIN_VALUE) {
+            return Integer.MIN_VALUE;
+        }
+
+        return (int) value;
     }
 
     private static String toLog(long bytes) {
